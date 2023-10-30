@@ -10,11 +10,31 @@ export async function redirectToAuthCodeFlow(clientId: string) {
   params.append("client_id", clientId);
   params.append("response_type", "code");
   params.append("redirect_uri", "http://localhost:5173/callback");
-  params.append("scope", "user-read-private user-read-email");
+  // We probably won't need Email and should remove from the scope. Private info tells us the type of subscription they have which may be needed to prevent API calls that require a premium subscription.
+  params.append("scope", "user-read-private user-read-email user-top-read");
   params.append("code_challenge_method", "S256");
   params.append("code_challenge", challenge);
 
   document.location = `https://accounts.spotify.com/authorize?${params.toString()}`;
+}
+
+function generateCodeVerifier(length: number) {
+  let text = '';
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  for (let i = 0; i < length; i++) {
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+}
+
+async function generateCodeChallenge(codeVerifier: string) {
+  const data = new TextEncoder().encode(codeVerifier);
+  const digest = await window.crypto.subtle.digest('SHA-256', data);
+  return btoa(String.fromCharCode.apply(null, [...new Uint8Array(digest)]))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
 }
 
 export async function getAccessToken(clientId: string, code: string): Promise<string> {
@@ -45,6 +65,7 @@ export async function fetchProfile(token: string): Promise<UserProfile> {
   return await result.json();
 }
 
+// Temporary function to test authorization and profile fetching
 export function populateUI(profile: UserProfile) {
   document.getElementById("displayName")!.innerText = profile.display_name;
   if (profile.images[0]) {
@@ -60,23 +81,3 @@ export function populateUI(profile: UserProfile) {
   document.getElementById("url")!.setAttribute("href", profile.href);
   document.getElementById("imgUrl")!.innerText = profile.images[0]?.url ?? '(no profile image)';
 }
-
-function generateCodeVerifier(length: number) {
-  let text = '';
-  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-  for (let i = 0; i < length; i++) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
-}
-
-async function generateCodeChallenge(codeVerifier: string) {
-  const data = new TextEncoder().encode(codeVerifier);
-  const digest = await window.crypto.subtle.digest('SHA-256', data);
-  return btoa(String.fromCharCode.apply(null, [...new Uint8Array(digest)]))
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, '');
-}
-
