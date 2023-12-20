@@ -1,34 +1,30 @@
-import { useState, useEffect, ReactNode } from "react";
-import { redirectToAuthCodeFlow } from "../utils/spotifyUtils";
+import { useEffect } from "react";
+import { getAccessToken } from "../utils/spotifyUtils";
+import { useAuth } from "./AuthProvider";
 
 
-interface AuthenticatorProps {
-  children: ReactNode;
-}
+export default function Authenticator() {
+    const { login }  = useAuth();
 
-export default function Authenticator({ children }: AuthenticatorProps) {
-  const [authenticated, setAuthenticated] = useState(false);
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get("code");
 
-  useEffect(() => {
-    onLoad();
-  }, []);
+        if (code) {
+            getAccessToken(code).then((token) => {
+                localStorage.setItem("access_token", token);
+                window.location.href = "/home";
+            });
+        } else {
+            console.error("Authorization Code not found");
+            login();
+        }
+    }, []);
 
-  const onLoad = async () => {
-    const clientId = "a7656102b57f42fbb9eb73a9cfc1cf9f";
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
 
-    // TODO: Implement authentication flow when user visits a protected route (all routes except login)
-    if (!code) {
-      // Authorize user
-      redirectToAuthCodeFlow(clientId);
-    } else {
-     // Acquire and securely store access token
-    }
-  }
-
-  return (
-    authenticated ? <>{children}</> : <h1>Not authenticated</h1>
-  );
-
+    return (
+        <div>
+            <p>Authenticating...</p>
+        </div>
+    );
 }

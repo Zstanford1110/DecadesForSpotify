@@ -1,19 +1,18 @@
+import { useAuth } from "../components/AuthProvider";
 
-interface LoginProps {
-  handleAuthentication: () => void;
-}
-
-export default function LoginPage({ handleAuthentication }: LoginProps) {
+export default function LandingPage() {
+  const { login, isAuthenticated } = useAuth();
+  
 
   const handleLogin = () => {
-    // Make this do something :)
-    handleAuthentication();
-  };
+    login();
+  }
 
   return (
     <div>
       <h1>Login Page</h1>
       <p>Click the button below to login!</p>
+      <p>Is authenticated? {isAuthenticated ? "Yes" : "No"}</p>
       <button onClick={handleLogin}>Login</button>
     </div>
   );
