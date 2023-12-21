@@ -1,32 +1,49 @@
 import './styles/App.css'
 import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
-import ErrorPage from './routes/errorPage.tsx';
-import ProfilePage from './routes/profilePage.tsx';
-import Authenticator from './components/Authenticator.tsx';
-import { useState } from 'react';
+import HomePage from './pages/homePage.tsx';
+import ErrorPage from './pages/errorPage.tsx';
+import LoginPage from './pages/loginPage.tsx';
+import ProfilePage from './pages/profilePage.tsx';
+import Authenticator from './components/authentication/Authenticator.tsx';
+import PrivateRouteLoader from './components/authentication/PrivateRouteLoader.tsx';
 
-function Root() {
+const Root = () => {
   return (
     <>
-    Let's freaking go dude
+      <h1>Root</h1>
       <Outlet />
     </>
-  );
+  )
 }
 
 
 const router = createBrowserRouter([
   {
+    id: "root",
     path: "/",
     element: <Root />,
     errorElement: <ErrorPage />,
+    loader: PrivateRouteLoader,
     children: [
       {
-        path: "/callback",
-        element: <ProfilePage />,
-        errorElement: <ErrorPage />,
+        path: "/home",
+        element: <HomePage />,
       },
+      {
+        path: "/profile",
+        element: <ProfilePage />,
+      }
     ]
+  },
+  {
+    path: "/login",
+    element: <LoginPage />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/auth",
+    element: <Authenticator />,
+    errorElement: <ErrorPage />,
   }
 ]);
 
@@ -34,9 +51,7 @@ const router = createBrowserRouter([
 export default function App() {
   return (
     <>
-      <Authenticator>
         <RouterProvider router={router} />
-      </Authenticator>
     </>
   )
 }

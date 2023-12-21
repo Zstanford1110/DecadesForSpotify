@@ -1,26 +1,35 @@
-import { UserProfile } from "../types/spotifyTypes";
+import { AccessTokenResponse, UserProfile } from "../types/spotifyTypes";
 
-export async function redirectToAuthCodeFlow(clientId: string) {
-  const verifier = generateCodeVerifier(128);
-  const challenge = await generateCodeChallenge(verifier);
+const clientId = import.meta.env.VITE_CLIENT_ID;
+const redirectURI = import.meta.env.VITE_REDIRECT_URI;
 
-  localStorage.setItem("verifier", verifier);
 
-  const params = new URLSearchParams();
-  params.append("client_id", clientId);
-  params.append("response_type", "code");
-  params.append("redirect_uri", "http://localhost:5173/callback");
-  // We probably won't need Email and should remove from the scope. Private info tells us the type of subscription they have which may be needed to prevent API calls that require a premium subscription.
-  params.append("scope", "user-read-private user-read-email user-top-read");
-  params.append("code_challenge_method", "S256");
-  params.append("code_challenge", challenge);
+export async function redirectToAuthCodeFlow() {
+  const codeVerifier = generateCodeVerifier(128);
+  const challenge = await generateCodeChallenge(codeVerifier);
 
-  document.location = `https://accounts.spotify.com/authorize?${params.toString()}`;
+
+  localStorage.setItem("codeVerifier", codeVerifier);
+
+  const scope = "user-read-private user-read-email user-top-read";
+  const authUrl = new URL("https://accounts.spotify.com/authorize");
+
+  const params = {
+    client_id: clientId!,
+    response_type: "code",
+    redirect_uri: redirectURI!,
+    scope,
+    code_challenge_method: "S256",
+    code_challenge: challenge
+  };
+
+  authUrl.search = new URLSearchParams(params).toString();
+  window.location.href = authUrl.toString();
 }
 
 function generateCodeVerifier(length: number) {
   let text = '';
-  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
   for (let i = 0; i < length; i++) {
       text += possible.charAt(Math.floor(Math.random() * possible.length));
@@ -37,47 +46,43 @@ async function generateCodeChallenge(codeVerifier: string) {
       .replace(/=+$/, '');
 }
 
-export async function getAccessToken(clientId: string, code: string): Promise<string> {
-  const verifier = localStorage.getItem("verifier");
+export async function getAccessToken(code: string): Promise<AccessTokenResponse> {
+  const codeVerifier = localStorage.getItem("codeVerifier");
 
-  const params = new URLSearchParams();
-  params.append("client_id", clientId);
-  params.append("grant_type", "authorization_code");
-  params.append("code", code);
-  params.append("redirect_uri", "http://localhost:5173/callback");
-  params.append("code_verifier", verifier!);
+  const payload = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      client_id: clientId!,
+      grant_type: 'authorization_code',
+      code: code!,
+      redirect_uri: redirectURI!,
+      code_verifier: codeVerifier!,
+    }),
+  }
 
-  const result = await fetch("https://accounts.spotify.com/api/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: params
-  });
+  const body = await fetch('https://accounts.spotify.com/api/token', payload);
+  const response = await body.json();
 
-  const { access_token } = await result.json();
-  return access_token;
+  console.log(response);
+
+  return response;
 }
 
-export async function fetchProfile(token: string): Promise<UserProfile> {
-  const result = await fetch("https://api.spotify.com/v1/me", {
-      method: "GET", headers: { Authorization: `Bearer ${token}` }
+export async function spotifyRequest (url: string, token: string) {
+  const result = await fetch(url, {
+    method: "GET", headers: { Authorization: `Bearer ${token}` }
   });
 
   return await result.json();
 }
 
-// Temporary function to test authorization and profile fetching
-export function populateUI(profile: UserProfile) {
-  document.getElementById("displayName")!.innerText = profile.display_name;
-  if (profile.images[0]) {
-      const profileImage = new Image(200, 200);
-      profileImage.src = profile.images[0].url;
-      document.getElementById("avatar")!.appendChild(profileImage);
-  }
-  document.getElementById("id")!.innerText = profile.id;
-  document.getElementById("email")!.innerText = profile.email;
-  document.getElementById("uri")!.innerText = profile.uri;
-  document.getElementById("uri")!.setAttribute("href", profile.external_urls.spotify);
-  document.getElementById("url")!.innerText = profile.href;
-  document.getElementById("url")!.setAttribute("href", profile.href);
-  document.getElementById("imgUrl")!.innerText = profile.images[0]?.url ?? '(no profile image)';
+export async function fetchProfile(token: string): Promise<UserProfile> {
+  const result = await fetch("https://api.spotify.com/v1/me", {
+    method: "GET", headers: { Authorization: `Bearer ${token}` }
+  });
+
+  return await result.json();
 }
