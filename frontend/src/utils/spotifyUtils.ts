@@ -1,4 +1,4 @@
-import { UserProfile } from "../types/spotifyTypes";
+import { AccessTokenResponse, UserProfile } from "../types/spotifyTypes";
 
 const clientId = import.meta.env.VITE_CLIENT_ID;
 const redirectURI = import.meta.env.VITE_REDIRECT_URI;
@@ -46,7 +46,7 @@ async function generateCodeChallenge(codeVerifier: string) {
       .replace(/=+$/, '');
 }
 
-export async function getAccessToken(code: string): Promise<string> {
+export async function getAccessToken(code: string): Promise<AccessTokenResponse> {
   const codeVerifier = localStorage.getItem("codeVerifier");
 
   const payload = {
@@ -68,16 +68,15 @@ export async function getAccessToken(code: string): Promise<string> {
 
   console.log(response);
 
-  return response.access_token;
+  return response;
 }
 
-export function getAccessTokenFromCookie(): string | null {
-  const cookies = document.cookie.split(";");
-  const accessTokenCookie = cookies.find(cookie => cookie.trim().startsWith("access_token="));
+export async function spotifyRequest (url: string, token: string) {
+  const result = await fetch(url, {
+    method: "GET", headers: { Authorization: `Bearer ${token}` }
+  });
 
-  if (accessTokenCookie) return accessTokenCookie.split("=")[1];
-  
-  return null
+  return await result.json();
 }
 
 export async function fetchProfile(token: string): Promise<UserProfile> {

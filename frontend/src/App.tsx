@@ -1,70 +1,57 @@
 import './styles/App.css'
 import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
-import ErrorPage from './routes/errorPage.tsx';
-import ProfilePage from './routes/profilePage.tsx';
-import HomePage from './routes/homePage.tsx';
-import LoginPage from './routes/loginPage.tsx';
-import PrivateRoutes from './components/PrivateRoutes.tsx';
-import { AuthProvider } from './components/AuthProvider.tsx';
-import Authenticator from './components/Authenticator.tsx';
+import HomePage from './pages/homePage.tsx';
+import ErrorPage from './pages/errorPage.tsx';
+import LoginPage from './pages/loginPage.tsx';
+import ProfilePage from './pages/profilePage.tsx';
+import Authenticator from './components/authentication/Authenticator.tsx';
+import PrivateRouteLoader from './components/authentication/PrivateRouteLoader.tsx';
 
-function Layout() {
+const Root = () => {
   return (
     <>
-      Let's freaking go dude
+      <h1>Root</h1>
       <Outlet />
     </>
-  );
+  )
 }
 
+
+const router = createBrowserRouter([
+  {
+    id: "root",
+    path: "/",
+    element: <Root />,
+    errorElement: <ErrorPage />,
+    loader: PrivateRouteLoader,
+    children: [
+      {
+        path: "/home",
+        element: <HomePage />,
+      },
+      {
+        path: "/profile",
+        element: <ProfilePage />,
+      }
+    ]
+  },
+  {
+    path: "/login",
+    element: <LoginPage />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/auth",
+    element: <Authenticator />,
+    errorElement: <ErrorPage />,
+  }
+]);
+
+
 export default function App() {
-  const router = createBrowserRouter([
-    {
-      path: "/login",
-      element: <LoginPage />,
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: "/auth",
-      element: <Authenticator />,
-      errorElement: <ErrorPage />,
-    },
-    {
-      element: <Layout />,
-      errorElement: <ErrorPage />,
-      children: [
-        {
-          path: "/",
-          children: [
-            {
-              path: "/",
-              element: <PrivateRoutes />,
-              errorElement: <ErrorPage />,
-              children: [
-                {
-                  path: "/profile",
-                  element: <ProfilePage />,
-                  errorElement: <ErrorPage />,
-                },
-                {
-                  path: "/home",
-                  element: <HomePage />,
-                  errorElement: <ErrorPage />,
-                }
-              ]
-            },
-          ]
-        },
-      ]
-    }
-  ]);
-
-
   return (
     <>
-      <AuthProvider>
         <RouterProvider router={router} />
-      </AuthProvider>
     </>
   )
 }
