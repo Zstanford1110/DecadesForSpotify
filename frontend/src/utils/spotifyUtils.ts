@@ -1,4 +1,5 @@
-import { AccessTokenResponse, UserProfile } from "../types/spotifyTypes";
+import { AccessTokenResponse } from "../types/spotifyTypes";
+import { extractRefreshToken } from "./authUtils";
 
 const clientId = import.meta.env.VITE_CLIENT_ID;
 const redirectURI = import.meta.env.VITE_REDIRECT_URI;
@@ -66,21 +67,36 @@ export async function getAccessToken(code: string): Promise<AccessTokenResponse>
   const body = await fetch('https://accounts.spotify.com/api/token', payload);
   const response = await body.json();
 
-  console.log(response);
+  return response;
+}
+
+export async function refreshAccessToken(): Promise<AccessTokenResponse> {
+  const refreshToken = extractRefreshToken();
+  if (!refreshToken) {
+    throw new Error("No refresh token available");
+  }
+
+  const payload = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken!,
+      client_id: clientId!,
+    }),
+  }
+
+  const body = await fetch('https://accounts.spotify.com/api/token', payload);
+  const response = await body.json();
 
   return response;
+
 }
 
 export async function spotifyRequest (url: string, token: string) {
   const result = await fetch(url, {
-    method: "GET", headers: { Authorization: `Bearer ${token}` }
-  });
-
-  return await result.json();
-}
-
-export async function fetchProfile(token: string): Promise<UserProfile> {
-  const result = await fetch("https://api.spotify.com/v1/me", {
     method: "GET", headers: { Authorization: `Bearer ${token}` }
   });
 

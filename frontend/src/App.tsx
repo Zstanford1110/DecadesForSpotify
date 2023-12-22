@@ -3,7 +3,7 @@ import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
 import HomePage from './pages/homePage.tsx';
 import ErrorPage from './pages/errorPage.tsx';
 import LoginPage from './pages/loginPage.tsx';
-import ProfilePage from './pages/profilePage.tsx';
+import { ProfilePage, ProfileDataLoader } from './pages/profilePage.tsx';
 import Authenticator from './components/authentication/Authenticator.tsx';
 import PrivateRouteLoader from './components/authentication/PrivateRouteLoader.tsx';
 
@@ -32,6 +32,7 @@ const router = createBrowserRouter([
       {
         path: "/profile",
         element: <ProfilePage />,
+        loader: ProfileDataLoader,
       }
     ]
   },
