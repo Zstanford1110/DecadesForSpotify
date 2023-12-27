@@ -7,19 +7,11 @@ export function checkAuth(): boolean {
         accessToken = extractAccessToken();
     }
 
-    if (accessToken) {
-        return true;
+    if (!spAuth || accessToken === "No Access Token") {
+        return false;
     }
 
-    return false;
-}
-
-export function checkExpiredToken(): boolean {
-    const spAuth = localStorage.getItem("spAuth");
-    
-
-    
-    return false;
+    return true;
 }
 
 export function extractAccessToken(): string {
@@ -30,7 +22,7 @@ export function extractAccessToken(): string {
     }
     const regex = /"access_token":"([^"]+)"/;
     const match = input.match(regex);
-    if(match) {
+    if (match) {
         return match[1];
     }
     return "No Access Token";
@@ -44,7 +36,7 @@ export function extractRefreshToken(): string {
     }
     const regex = /"refresh_token":"([^"]+)"/;
     const match = input.match(regex);
-    if(match) {
+    if (match) {
         return match[1];
     }
     return "No Refresh Token";
@@ -55,5 +47,7 @@ export function login() {
 }
 
 export function logout() {
-
+    localStorage.removeItem("spAuth");
+    localStorage.removeItem("codeVerifier");
+    window.location.href = "/login";
 }

@@ -1,4 +1,4 @@
-import { AccessTokenResponse } from "../types/spotifyTypes";
+import { AccessTokenResponse, TopArtists } from "../types/spotifyTypes";
 import { extractRefreshToken } from "./authUtils";
 
 const clientId = import.meta.env.VITE_CLIENT_ID;
@@ -11,6 +11,8 @@ export async function redirectToAuthCodeFlow() {
 
 
   localStorage.setItem("codeVerifier", codeVerifier);
+
+  console.log("codeVerifier created: ", codeVerifier);
 
   const scope = "user-read-private user-read-email user-top-read";
   const authUrl = new URL("https://accounts.spotify.com/authorize");
@@ -49,6 +51,8 @@ async function generateCodeChallenge(codeVerifier: string) {
 
 export async function getAccessToken(code: string): Promise<AccessTokenResponse> {
   const codeVerifier = localStorage.getItem("codeVerifier");
+
+  console.log("codeVerifier retrieved: ", codeVerifier);
 
   const payload = {
     method: 'POST',
@@ -95,10 +99,25 @@ export async function refreshAccessToken(): Promise<AccessTokenResponse> {
 
 }
 
-export async function spotifyRequest (url: string, token: string) {
+export async function spotifyRequest(url: string, token: string) {
   const result = await fetch(url, {
-    method: "GET", headers: { Authorization: `Bearer ${token}` }
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
   });
 
+  // If bad request or unauthorized, refresh access token and try again
+  // Need to double check this implementation. This could create INFINITE requests if not careful.
+  if (result.status === 400 || result.status === 401) {
+    const newAuth = await refreshAccessToken();
+    localStorage.setItem("spAuth", newAuth.toString());
+    return spotifyRequest(url, newAuth.access_token);
+  }
+
   return await result.json();
+}
+
+// Limit is the number of records to return (max = 50), Offset is the starting index to start returning from (use to retrieve more than the top 50)
+export async function getTopArtists(token: string, limit: number, offset: number): Promise<TopArtists> {
+  const url = `https://api.spotify.com/v1/me/top/artists?time_range=long_term&offset=${offset}&limit=${limit}`;
+  return await spotifyRequest(url, token);
 }

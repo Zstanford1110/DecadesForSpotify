@@ -3,7 +3,7 @@ import { extractAccessToken } from "../utils/authUtils";
 import { spotifyRequest } from "../utils/spotifyUtils";
 import { UserProfile } from "../types/spotifyTypes";
 
-export async function ProfileDataLoader() {
+export async function profileDataLoader() {
   const accessToken = extractAccessToken();
   const profileData = await spotifyRequest("https://api.spotify.com/v1/me", accessToken);
 

@@ -1,9 +1,9 @@
 import './styles/App.css'
 import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
-import HomePage from './pages/homePage.tsx';
+import { HomePage, homePageDataLoader } from './pages/homePage.tsx';
 import ErrorPage from './pages/errorPage.tsx';
 import LoginPage from './pages/loginPage.tsx';
-import { ProfilePage, ProfileDataLoader } from './pages/profilePage.tsx';
+import { ProfilePage, profileDataLoader } from './pages/profilePage.tsx';
 import Authenticator from './components/authentication/Authenticator.tsx';
 import PrivateRouteLoader from './components/authentication/PrivateRouteLoader.tsx';
 
@@ -28,11 +28,12 @@ const router = createBrowserRouter([
       {
         path: "/home",
         element: <HomePage />,
+        loader: homePageDataLoader,
       },
       {
         path: "/profile",
         element: <ProfilePage />,
-        loader: ProfileDataLoader,
+        loader: profileDataLoader,
       }
     ]
   },
@@ -52,7 +53,7 @@ const router = createBrowserRouter([
 export default function App() {
   return (
     <>
-        <RouterProvider router={router} />
+      <RouterProvider router={router} />
     </>
   )
 }
