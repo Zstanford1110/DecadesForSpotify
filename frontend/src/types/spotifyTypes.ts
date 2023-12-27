@@ -3,8 +3,8 @@ export interface UserProfile {
   display_name: string;
   email: string;
   explicit_content: {
-      filter_enabled: boolean,
-      filter_locked: boolean
+    filter_enabled: boolean,
+    filter_locked: boolean
   },
   external_urls: { spotify: string; };
   followers: { href: string; total: number; };
@@ -12,6 +12,29 @@ export interface UserProfile {
   id: string;
   images: Image[];
   product: string;
+  type: string;
+  uri: string;
+}
+
+export interface TopArtists {
+  items: Artist[];
+  total: number;
+  limit: number;
+  offset: number;
+  previous: string;
+  href: string;
+  next: string;
+}
+
+export interface Artist {
+  external_urls: { spotify: string; };
+  followers: { href: string; total: number; };
+  genres: string[];
+  href: string;
+  id: string;
+  images: Image[];
+  name: string;
+  popularity: number;
   type: string;
   uri: string;
 }
