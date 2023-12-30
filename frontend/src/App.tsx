@@ -10,7 +10,6 @@ import PrivateRouteLoader from './components/authentication/PrivateRouteLoader.t
 const Root = () => {
   return (
     <>
-      <h1>Root</h1>
       <Outlet />
     </>
   )
