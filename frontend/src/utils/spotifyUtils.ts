@@ -121,3 +121,5 @@ export async function getTopArtists(token: string, limit: number, offset: number
   const url = `https://api.spotify.com/v1/me/top/artists?time_range=long_term&offset=${offset}&limit=${limit}`;
   return await spotifyRequest(url, token);
 }
+
+// Loading on scroll for songs and artists

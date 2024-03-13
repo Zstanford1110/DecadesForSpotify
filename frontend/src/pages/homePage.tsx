@@ -19,9 +19,12 @@ export async function homePageDataLoader() {
     // set a limit, like maybe it's only relevant to check their top 500 artists and sort them over the decades
     // Use util function here to concisely retrieve artist and track data
 
-    // Cannot set offsets over 50, so we need to remove the last item from the first request to avoid duplicates
-    // Shouldn't need this anymore if my offsets are correct
-    // const topArtistData1DuplicateRemoved = topArtistData1.items.slice(0, -1);
+    // How about this: The app performs a fetch for the user's top artists and tracks on login only once, then caches the data, and
+    // it continues to use the cached data until the user logs out. This way, the app doesn't overload the API with requests.
+    // How do I perform the API requests on login or return from a user who has chosen to stay logged in across browser sessions?
+    // How do I store the returned output?
+    // How do I access the stored data and use it across all pages without needing to make API requests?
+    // How do I handle errors with the initial API requests?
 
     const combinedTopArtistData = {
         items: [...topArtistData1.items, ...topArtistData2.items, ...topArtistData3.items, ...topArtistDat4.items],
