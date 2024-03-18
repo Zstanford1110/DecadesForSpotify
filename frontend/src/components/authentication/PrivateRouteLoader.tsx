@@ -7,6 +7,7 @@ export default function PrivateRouteLoader() {
         return redirectToAuthCodeFlow();
     } else {
         // Load the user's data
+
     }
     return null;
 }

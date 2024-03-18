@@ -30,7 +30,7 @@ export async function redirectToAuthCodeFlow() {
 
 function generateCodeVerifier(length: number) {
   let text = '';
-  let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
   for (let i = 0; i < length; i++) {
       text += possible.charAt(Math.floor(Math.random() * possible.length));
@@ -123,7 +123,4 @@ export async function getTopTracks(token: string, limit: number, offset: number)
   return await spotifyRequest(url, token);
 }
 
-
-
-
-// Loading on scroll for songs and artists
+// Idea: Loading on scroll for songs and artists
