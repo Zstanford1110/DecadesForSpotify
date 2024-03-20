@@ -7,6 +7,7 @@ import ProfilePage from './pages/profilePage.tsx';
 import Authenticator from './components/authentication/Authenticator.tsx';
 import PrivateRouteLoader from './components/authentication/PrivateRouteLoader.tsx';
 import { homePageDataLoader, profileDataLoader } from './utils/loaderFunctions.ts';
+import { SpotifyDataProvider } from './components/SpotifyDataProvider.tsx';
 
 const Root = () => {
   return (
@@ -53,7 +54,9 @@ const router = createBrowserRouter([
 export default function App() {
   return (
     <>
-      <RouterProvider router={router} />
+      <SpotifyDataProvider>
+        <RouterProvider router={router} />
+      </SpotifyDataProvider>
     </>
   )
 }
