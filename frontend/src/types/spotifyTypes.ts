@@ -85,6 +85,13 @@ export interface Album {
   uri: string;
 }
 
+// Spotify Data interface for type definition using existing types from spotifyTypes.ts
+export interface SpotifyData {
+  profile: UserProfile | null,
+  artists: TopArtists | null,
+  tracks: TopTracks | null,
+}
+
 export interface Image {
   url: string;
   height: number;

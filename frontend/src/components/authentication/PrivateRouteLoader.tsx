@@ -1,27 +1,14 @@
-import { useEffect, useState } from "react";
 import { checkAuth } from "../../utils/authUtils";
 import { redirectToAuthCodeFlow } from "../../utils/spotifyUtils";
 
-export default function PrivateRouteLoader() {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    useEffect(()=> {
-        const authenticate = async () => {
-            const authStatus = await checkAuth();
-            setIsAuthenticated(authStatus);
-        };
-
-        authenticate();
-    }, []);
-
-    if (isAuthenticated === null) {
-        return <div>Loading...</div>;
-    }
-
-    if(!isAuthenticated) {
+// This function checks authentication and redirects if not authenticated.
+// It returns a promise that resolves to true if authenticated, otherwise it triggers a redirect.
+export async function authenticateAndRedirect() {
+    const isAuthenticated = await checkAuth();
+    if (!isAuthenticated) {
         redirectToAuthCodeFlow();
-        return <div>Redirecting to login...</div>;
     }
-
-    return null;
+    return true;
 }
+

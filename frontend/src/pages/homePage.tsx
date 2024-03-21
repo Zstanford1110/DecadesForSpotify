@@ -1,12 +1,13 @@
 import { logout } from "../utils/authUtils";
 import { Link } from "react-router-dom";
 
-import { useSpotifyData } from "../components/SpotifyDataProvider";
+import { useSpotifyData } from "../utils/hooks/useSpotifyData";
 
 export default function HomePage() {
     const spotifyData = useSpotifyData();
     const topArtistData = spotifyData.artists;
     const profileData = spotifyData.profile;
+  
 
     const handleLogout = () => {
         logout();
