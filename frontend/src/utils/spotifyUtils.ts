@@ -1,4 +1,4 @@
-import { AccessTokenResponse, TopArtists } from "../types/spotifyTypes";
+import { AccessTokenResponse, TopArtists, TopTracks } from "../types/spotifyTypes";
 import { extractRefreshToken } from "./authUtils";
 
 const clientId = import.meta.env.VITE_CLIENT_ID;
@@ -11,8 +11,6 @@ export async function redirectToAuthCodeFlow() {
 
 
   localStorage.setItem("codeVerifier", codeVerifier);
-
-  console.log("codeVerifier created: ", codeVerifier);
 
   const scope = "user-read-private user-read-email user-top-read";
   const authUrl = new URL("https://accounts.spotify.com/authorize");
@@ -32,7 +30,7 @@ export async function redirectToAuthCodeFlow() {
 
 function generateCodeVerifier(length: number) {
   let text = '';
-  let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
   for (let i = 0; i < length; i++) {
       text += possible.charAt(Math.floor(Math.random() * possible.length));
@@ -51,8 +49,6 @@ async function generateCodeChallenge(codeVerifier: string) {
 
 export async function getAccessToken(code: string): Promise<AccessTokenResponse> {
   const codeVerifier = localStorage.getItem("codeVerifier");
-
-  console.log("codeVerifier retrieved: ", codeVerifier);
 
   const payload = {
     method: 'POST',
@@ -121,3 +117,10 @@ export async function getTopArtists(token: string, limit: number, offset: number
   const url = `https://api.spotify.com/v1/me/top/artists?time_range=long_term&offset=${offset}&limit=${limit}`;
   return await spotifyRequest(url, token);
 }
+
+export async function getTopTracks(token: string, limit: number, offset: number): Promise<TopTracks> {
+  const url = `https://api.spotify.com/v1/me/top/artists?time_range=long_term&offset=${offset}&limit=${limit}`;
+  return await spotifyRequest(url, token);
+}
+
+// Idea: Loading on scroll for songs and artists

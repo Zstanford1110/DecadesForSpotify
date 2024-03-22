@@ -1,29 +1,13 @@
-import { extractAccessToken, logout } from "../utils/authUtils";
-import { Link, useLoaderData } from "react-router-dom";
-import { getTopArtists } from "../utils/spotifyUtils";
-import { TopArtists } from "../types/spotifyTypes";
+import { logout } from "../utils/authUtils";
+import { Link } from "react-router-dom";
 
-export async function homePageDataLoader() {
-    const accessToken = extractAccessToken();
-    const [topArtistData1, topArtistData2] = await Promise.all([
-        getTopArtists(accessToken, 50, 0),
-        getTopArtists(accessToken, 50, 49)
-    ]);
+import { useSpotifyData } from "../utils/hooks/useSpotifyData";
 
-    // Cannot set offsets over 50, so we need to remove the last item from the first request to avoid duplicates
-    const topArtistData1DuplicateRemoved = topArtistData1.items.slice(0, -1);
-
-    const combinedTopArtistData = {
-        items: [...topArtistData1DuplicateRemoved, ...topArtistData2.items],
-        total: topArtistData1.total + topArtistData2.total
-    };
-
-    return combinedTopArtistData;
-}
-
-
-export function HomePage() {
-    const topArtistData = useLoaderData() as TopArtists;
+export default function HomePage() {
+    const spotifyData = useSpotifyData();
+    const topArtistData = spotifyData.artists;
+    const profileData = spotifyData.profile;
+  
 
     const handleLogout = () => {
         logout();
@@ -36,7 +20,7 @@ export function HomePage() {
     return (
         <div>
             <h1>Home Page</h1>
-            <p>Welcome "User"!</p>
+            <p>Welcome {profileData ? profileData.display_name : "User"}!</p>
             <Link to="/profile">
                 <button>Go to Profile</button>
             </Link>

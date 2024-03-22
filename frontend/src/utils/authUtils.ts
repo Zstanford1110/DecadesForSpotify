@@ -1,17 +1,28 @@
-import { redirectToAuthCodeFlow } from "./spotifyUtils";
+import { redirectToAuthCodeFlow, spotifyRequest } from "./spotifyUtils";
 
-export function checkAuth(): boolean {
+export async function checkAuth(): Promise<boolean> {
     const spAuth = localStorage.getItem("spAuth");
-    let accessToken = null;
-    if (spAuth) {
-        accessToken = extractAccessToken();
-    }
 
-    if (!spAuth || accessToken === "No Access Token") {
+    // First case, check if the spAuth exists at all
+    if (!spAuth) {
+        return false;
+    }
+    
+    // Extract the access token, make sure that it exists
+    const accessToken = extractAccessToken();
+    if (!accessToken || accessToken === "No Access Token") {
         return false;
     }
 
-    return true;
+    // Check the validity of the access token against the Spotify API
+    try {
+        await spotifyRequest("https://api.spotify.com/v1/me", accessToken);
+        return true;
+    } catch (error) {
+        console.error("Access token is invalid");
+        return false;
+    }
+
 }
 
 export function extractAccessToken(): string {
